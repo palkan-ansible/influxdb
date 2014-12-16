@@ -31,6 +31,15 @@ port     = 8086    # binding is disabled if the port isn't set
   # port = 2003
   # database = ""  # store graphite data in this database
 
+  # Configure the udp api
+  [input_plugins.udp]
+  enabled = {{ influxdb.udp }}
+
+  {% if influxdb.udp == "true" %}
+  port = {{ influxdb.udp_port }}
+  database = "{{ influxdb.udp_db }}"
+  {% endif %}
+
 # Raft configuration
 [raft]
 # The raft port should be open between all servers in a cluster.
