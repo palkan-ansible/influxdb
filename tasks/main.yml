@@ -1,22 +1,46 @@
-- name: Fetch package
+- name: InfluxDB | Fetch package
   get_url: url=http://s3.amazonaws.com/influxdb/influxdb_{{ influxdb.version }}_amd64.deb dest=/usr/local/src/influxdb_{{ influxdb.version }}_amd64.deb
 
-- name: Install package
+- name: InfluxDB | Install package
   command: dpkg --skip-same-version -i /usr/local/src/influxdb_{{ influxdb.version }}_amd64.deb
   register: dpkg_result
   changed_when: "dpkg_result.stdout.startswith('Selecting')"
 
-- name: Check for ip address in config file
+- name: InfluxDB | Check for ip address in config file
   command: grep -E '^\s*hostname.*{{ ansible_default_ipv4.address }}' /opt/influxdb/shared/config.toml
   register: config_has_ip
   ignore_errors: true
   changed_when: false
 
-- name: Delete raft dir before hostname change
+- name: InfluxDB | Delete raft dir before hostname change
   file: dest=/opt/influxdb/shared/data/raft state=absent
   when: config_has_ip|failed
 
-- name: Update config
+- name: InfluxDB | Update config
   template: src=config.toml dest=/opt/influxdb/shared/config.toml
   notify:
     - restart influxdb
+
+- pause: seconds=10
+
+- name: InfluxDB | Get Users List
+  command: curl 'http://localhost:8086/cluster_admins?u=root&p=root'
+  register: cluster_admins
+
+- name: InfluxDB | Create Cluster Admin
+  command: > 
+    curl -X POST "http://localhost:8086/cluster_admins?u=root&p=root" -d \
+    '{"name": "{{ influxdb.admin_name }}", "password": "{{ influxdb.admin_pass }}"}'
+  when: cluster_admins.stdout.find(influxdb.admin_name) == -1
+  register: user_created
+
+- name: InfluxDB | Get Users List
+  command: curl 'http://localhost:8086/cluster_admins?u=root&p=root'
+  when: cluster_admins.stdout.find(influxdb.admin_name) == -1
+  register: cluster_admins2
+  failed_when: cluster_admins2.stdout.find(influxdb.admin_name) == -1
+
+- name: InfluxDB | Delete user
+  command: >
+    curl -X DELETE 'http://localhost:8086/cluster_admins/root?u={{ influxdb.admin_name }}&p={{ influxdb.admin_pass }}'
+  when: cluster_admins2.stdout.find('root') != -1 and cluster_admins2.stdout.find(influxdb.admin_name) != -1

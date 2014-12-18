@@ -3,3 +3,4 @@ influxdb:
   seed_servers: [ ]
   replication_factor: 1
   udp: "false"
+  admin_name: admin
