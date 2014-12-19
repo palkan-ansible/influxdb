@@ -1,0 +1,5 @@
+- name: Update limits for root
+  lineinfile: dest="/etc/security/limits.conf" insertafter="EOF" line='root hard  nofile  65536' state="present"
+
+- name: Update limits for all users
+  lineinfile: dest="/etc/security/limits.conf" insertafter="EOF" line='* soft  nofile  65536' state="present"

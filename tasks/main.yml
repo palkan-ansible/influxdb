@@ -1,3 +1,5 @@
+- include: os_tune.yml tags=influx_os_tune
+
 - name: InfluxDB | Fetch package
   get_url: url=http://s3.amazonaws.com/influxdb/influxdb_{{ influxdb.version }}_amd64.deb dest=/usr/local/src/influxdb_{{ influxdb.version }}_amd64.deb
 
@@ -16,37 +18,35 @@
   file: dest=/opt/influxdb/shared/data/raft state=absent
   when: config_has_ip|failed
 
+- name: InfluxDB | Start Service
+  service: name=influxdb state=started
+
 - name: InfluxDB | Update config
   template: src=config.toml dest=/opt/influxdb/shared/config.toml
   notify:
     - restart influxdb
 
-- pause: seconds=5
+- pause: seconds=10
 
 - name: InfluxDB | Get Users List
   command: curl 'http://localhost:8086/cluster_admins?u=root&p=root'
-  register: cluster_admins
+  register: cluster_admins_root
   ignore_errors: True
 
 - name: InfluxDB | Get Users List as New Admin
   command: curl 'http://localhost:8086/cluster_admins?u={{ influxdb.admin_name }}&p={{ influxdb.admin_pass }}'
-  when: cluster_admins.stdout.find('Invalid username') != -1
+  when: cluster_admins_root|failed
   register: cluster_admins
 
 - name: InfluxDB | Create Cluster Admin
   command: > 
     curl -X POST "http://localhost:8086/cluster_admins?u=root&p=root" -d \
     '{"name": "{{ influxdb.admin_name }}", "password": "{{ influxdb.admin_pass }}"}'
-  when: cluster_admins.stdout.find(influxdb.admin_name) == -1
+  when: cluster_admins_root|success
   register: user_created
-
-- name: InfluxDB | Get Users List
-  command: curl 'http://localhost:8086/cluster_admins?u={{ influxdb.admin_name }}&p={{ influxdb.admin_pass }}'
-  when: cluster_admins.stdout.find(influxdb.admin_name) == -1
-  register: cluster_admins2
-  failed_when: cluster_admins2.stdout.find(influxdb.admin_name) == -1
+  failed_when: user_created.stdout.find('Invalid') != -1
 
 - name: InfluxDB | Delete user
   command: >
     curl -X DELETE 'http://localhost:8086/cluster_admins/root?u={{ influxdb.admin_name }}&p={{ influxdb.admin_pass }}'
-  when: user_created.changed and cluster_admins2.stdout.find('root') != -1 and cluster_admins2.stdout.find(influxdb.admin_name) != -1
+  when: user_created|success and cluster_admins_root|success
