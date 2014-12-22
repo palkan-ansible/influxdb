@@ -31,6 +31,7 @@
 - name: InfluxDB | Get Users List
   command: curl 'http://localhost:8086/cluster_admins?u=root&p=root'
   register: cluster_admins_root
+  failed_when: cluster_admins_root.stdout.find('Invalid') != -1
   ignore_errors: True
 
 - name: InfluxDB | Get Users List as New Admin
