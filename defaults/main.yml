@@ -4,3 +4,4 @@ influxdb:
   replication_factor: 1
   udp: "false"
   admin_name: admin
+  nofiles: 678727
