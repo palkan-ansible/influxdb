@@ -23,7 +23,7 @@
 - name: Update limits for deplo
   lineinfile: dest="/etc/security/limits.conf" insertafter="EOF" line="{{ item }}" state="present"
   with_items: 
-    - "deplo  hard  nofile  65536"
-    - "deplo  soft  nofile  65536"
+    - "*  hard  nofile  65536"
+    - "*  soft  nofile  65536"
     - "deplo  hard  noproc  65536"
     - "deplo  soft  noproc  65536"
