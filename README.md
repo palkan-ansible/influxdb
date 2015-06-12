@@ -1,7 +1,7 @@
 InfluxDB
 ========
 
-Install [InfluxDB](http://influxdb.org/) time series database
+Install [InfluxDB](http://influxdb.org/) 0.9.x time series database
 
 Role Variables
 --------------
@@ -10,24 +10,18 @@ Role Variables
 
 | Name                        | Default Value | Description                                                      |
 |-----------------------------|---------------|------------------------------------------------------------------|
-| influxdb.version            | 0.5.4         | Version to install                                               |
-| influxdb.seed_servers       | []            | List of host:port to use as cluster seed servers                 |
-| influxdb.replication_factor | 1             | How many servers in the cluster should have a copy of each shard |
-
+| influxdb.version            | 0.9.0         | Version to install                                               |
+| influxdb.web_admin          | True          | Enable web admin interface                                       |
+| influxdb.web_admin_port     | 8083          | Web admin interface port                                         |
+| influxdb.http_port          | 8086          | HTTP API endpoint port                                           |
+| influxdb.udp                | False         | Enable UDP endpoint                                              |
+| influxdb.udp_port           | 4444          | UDP port                                                         |
+| influxdb.udp_db             | udp_db        | Database name for UDP data                                       |
+| influxdb.config_tpl         | 'influxdb.conf.j2' | A path to config template (to use custom template)               |
 
 Example Playbook
 -------------------------
 
     - hosts: servers
       roles:
-         - stympy.influxdb
-
-License
--------
-
-MIT
-
-Author Information
-------------------
-
-Benjamin Curtis <benjamin.curtis@gmail.com>
+         - palkan.influxdb

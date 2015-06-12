@@ -1,5 +1,3 @@
-- include: os_tune.yml tags=influx_os_tune
-
 - name: InfluxDB | Fetch package
   get_url: url=http://s3.amazonaws.com/influxdb/influxdb_{{ influxdb.version }}_amd64.deb dest=/usr/local/src/influxdb_{{ influxdb.version }}_amd64.deb
 
@@ -7,6 +5,9 @@
   command: dpkg --skip-same-version -i /usr/local/src/influxdb_{{ influxdb.version }}_amd64.deb
   register: dpkg_result
   changed_when: "dpkg_result.stdout.startswith('Selecting')"
+
+- name: InfluxDB | Link influx CLI
+  file: src=/opt/influxdb/influx dest=/usr/local/bin/influx state=link
 
 - name: InfluxDB | Check for ip address in config file
   command: grep -E '^\s*hostname.*{{ ansible_default_ipv4.address }}' /opt/influxdb/shared/config.toml
@@ -22,32 +23,6 @@
   service: name=influxdb state=started
 
 - name: InfluxDB | Update config
-  template: src=config.toml dest=/opt/influxdb/shared/config.toml
+  template: src={{ influxdb.config_tpl }} dest=/etc/opt/influxdb/influxdb.conf
   notify:
     - restart influxdb
-
-- pause: seconds=10
-
-- name: InfluxDB | Get Users List
-  command: curl 'http://localhost:8086/cluster_admins?u=root&p=root'
-  register: cluster_admins_root
-  failed_when: cluster_admins_root.stdout.find('Invalid') != -1
-  ignore_errors: True
-
-- name: InfluxDB | Get Users List as New Admin
-  command: curl 'http://localhost:8086/cluster_admins?u={{ influxdb.admin_name }}&p={{ influxdb.admin_pass }}'
-  when: cluster_admins_root|failed
-  register: cluster_admins
-
-- name: InfluxDB | Create Cluster Admin
-  command: > 
-    curl -X POST "http://localhost:8086/cluster_admins?u=root&p=root" -d \
-    '{"name": "{{ influxdb.admin_name }}", "password": "{{ influxdb.admin_pass }}"}'
-  when: cluster_admins_root|success
-  register: user_created
-  failed_when: user_created.stdout.find('Invalid') != -1
-
-- name: InfluxDB | Delete user
-  command: >
-    curl -X DELETE 'http://localhost:8086/cluster_admins/root?u={{ influxdb.admin_name }}&p={{ influxdb.admin_pass }}'
-  when: user_created|success and cluster_admins_root|success

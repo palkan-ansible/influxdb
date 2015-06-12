@@ -1,7 +1,9 @@
 influxdb:
-  version: 0.8.6
-  seed_servers: [ ]
-  replication_factor: 1
-  udp: "false"
-  admin_name: admin
-  nofiles: 678727
+  version: 0.9.0
+  web_admin: True
+  web_admin_port: 8083
+  http_port: 8086
+  udp: False
+  udp_port: 4444
+  udp_db: udp_db
+  config_tpl: 'influxdb.conf.j2'
