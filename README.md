@@ -3,6 +3,11 @@ InfluxDB
 
 Install [InfluxDB](http://influxdb.org/) 0.9.x time series database
 
+Installation
+--------------
+
+`ansible-galaxy install palkan.influxdb`
+
 Role Variables
 --------------
 
