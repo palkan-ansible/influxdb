@@ -10,7 +10,7 @@
   file: src=/opt/influxdb/influx dest=/usr/local/bin/influx state=link
 
 - name: InfluxDB | Check for ip address in config file
-  command: grep -E '^\s*hostname.*{{ ansible_default_ipv4.address }}' /opt/influxdb/shared/config.toml
+  command: grep -E '^\s*hostname.*{{ ansible_default_ipv4.address }}' /etc/opt/influxdb/influxdb.conf
   register: config_has_ip
   ignore_errors: true
   changed_when: false
