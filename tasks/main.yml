@@ -1,10 +1,20 @@
-- name: InfluxDB | Fetch package
+- name: InfluxDB | Fetch package | Debian
   get_url: url=http://s3.amazonaws.com/influxdb/influxdb_{{ influxdb.version }}_amd64.deb dest=/usr/local/src/influxdb_{{ influxdb.version }}_amd64.deb
+  when: ansible_os_family == "Debian"
 
-- name: InfluxDB | Install package
+- name: InfluxDB | Install package | Debian
   command: dpkg --skip-same-version -i /usr/local/src/influxdb_{{ influxdb.version }}_amd64.deb
   register: dpkg_result
   changed_when: "dpkg_result.stdout.startswith('Selecting')"
+  when: ansible_os_family == "Debian"
+
+- name: InfluxDB | Fetch package | RedHat
+  get_url: url=https://s3.amazonaws.com/influxdb/influxdb-{{ influxdb.version }}-1.x86_64.rpm dest=/usr/local/src/influxdb_{{ influxdb.version }}-1.x86_64.rpm
+  when: ansible_os_family == "RedHat"
+
+- name: InfluxDB | Install package | RedHat
+  yum: name=/usr/local/src/influxdb_{{ influxdb.version }}-1.x86_64.rpm state=installed
+  when: ansible_os_family == "RedHat"
 
 - name: InfluxDB | Link influx CLI
   file: src=/opt/influxdb/influx dest=/usr/local/bin/influx state=link
