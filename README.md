@@ -1,7 +1,7 @@
 InfluxDB
 ========
 
-Install [InfluxDB](http://influxdb.org/) 0.9.x time series database
+Installs [InfluxDB](http://influxdb.org/) 0.9.x time series database
 
 Installation
 --------------
