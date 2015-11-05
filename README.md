@@ -19,9 +19,7 @@ Role Variables
 | influxdb.web_admin          | True          | Enable web admin interface                                       |
 | influxdb.web_admin_port     | 8083          | Web admin interface port                                         |
 | influxdb.http_port          | 8086          | HTTP API endpoint port                                           |
-| influxdb.udp                | False         | Enable UDP endpoint                                              |
-| influxdb.udp_port           | 4444          | UDP port                                                         |
-| influxdb.udp_db             | udp_db        | Database name for UDP data                                       |
+| influxdb.udp                | None           | List of UDP endpoints configurations (see influxdb.conf.j2 for more info)  |
 | influxdb.config_tpl         | 'influxdb.conf.j2' | A path to config template (to use custom template)               |
 
 Example Playbook

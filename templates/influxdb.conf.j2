@@ -24,6 +24,7 @@ reporting-disabled = false
   heartbeat-timeout = "1s"
   leader-lease-timeout = "500ms"
   commit-timeout = "50ms"
+  cluster-tracing = false
 
 ###
 ### [data]
@@ -33,6 +34,16 @@ reporting-disabled = false
 
 [data]
   dir = "/var/opt/influxdb/data"
+  max-wal-size = 104857600
+  wal-flush-interval = "10m0s"
+  wal-partition-flush-delay = "2s"
+  wal-dir = "/var/opt/influxdb/wal"
+  wal-logging-enabled = true
+  wal-ready-series-size = 30720
+  wal-compaction-threshold = 0.5
+  wal-max-series-size = 1048576
+  wal-flush-cold-interval = "5s"
+  wal-partition-size-threshold = 20971520
 
 ###
 ### [cluster]
@@ -42,7 +53,10 @@ reporting-disabled = false
 ###
 
 [cluster]
+  force-remote-mapping = false
+  write-timeout = "5s"
   shard-writer-timeout = "5s"
+  shard-mapper-timeout = "5s"
 
 ###
 ### [retention]
@@ -52,7 +66,12 @@ reporting-disabled = false
 
 [retention]
   enabled = true
-  check-interval = "10m"
+  check-interval = "30m0s"
+
+[shard-precreation]
+  enabled = true
+  check-interval = "10m0s"
+  advance-period = "30m0s"
 
 ###
 ### [admin]
@@ -64,11 +83,16 @@ reporting-disabled = false
 [admin]
   enabled = true
   bind-address = ":{{ influxdb.web_admin_port }}"
+  https-enabled = false
 {% else %}
 [admin]
   enabled = false
 {% endif %}
 
+[monitor]
+  store-enabled = true
+  store-database = "_internal"
+  store-interval = "10s"
 
 ###
 ### [http]
@@ -84,6 +108,7 @@ reporting-disabled = false
   log-enabled = true
   write-tracing = false
   pprof-enabled = false
+  https-enabled = false
 
 ###
 ### [[graphite]]
@@ -129,24 +154,29 @@ reporting-disabled = false
 ### Controls the listener for InfluxDB line protocol data via UDP.
 ###
 
-{% if influxdb.udp %}
-[udp]
+{% if influxdb.udp is defined %}
+{% for udp in influxdb.udp %}
+[[udp]]
   enabled = true
-  bind-address = ":{{ influxdb.udp_port }}"
-  database = "{{ influxdb.udp_db }}"
-  batch-size = 0
-  batch-timeout = "0"
-{% else %}
-[udp]
-  enabled = false
+  bind-address = ":{{ udp.port }}"
+  database = "{{ udp.db }}"
+  {% if 'batch_size' in udp %}
+    batch-size = {{ udp.batch_size }}
+  {% else %}
+    batch-size = 1000
+  {% endif %}
+  {% if 'batch_timeout' in udp %}
+    batch-timeout = "{{ udp.batch_timeout }}"
+  {% else %}
+    batch-timeout = "1s"
+  {% endif %} 
+  {% if 'batch_pending' in udp %}
+    batch-pending = {{ udp.batch_pendign }}
+  {% else %}
+    batch-pending = 5
+  {% endif %} 
+{% endfor %}
 {% endif %}
-###
-### [monitoring]
-###
-
-[monitoring]
-  enabled = true
-  write-interval = "24h"
 
 ###
 ### [continuous_queries]
@@ -155,11 +185,12 @@ reporting-disabled = false
 ###
 
 [continuous_queries]
+  log-enabled = true
   enabled = true
   recompute-previous-n = 2
-  recompute-no-older-than = "10m"
+  recompute-no-older-than = "10m0s"
   compute-runs-per-interval = 10
-  compute-no-more-than = "2m"
+  compute-no-more-than = "2m0s"
 
 ###
 ### [hinted-handoff]
