@@ -1,7 +1,7 @@
 InfluxDB
 ========
 
-Installs [InfluxDB](http://influxdb.org/) 0.9.x time series database
+Installs [InfluxDB](http://influxdb.org/) 0.11.x time series database
 
 Installation
 --------------
@@ -15,12 +15,12 @@ Role Variables
 
 | Name                        | Default Value | Description                                                      |
 |-----------------------------|---------------|------------------------------------------------------------------|
-| influxdb.version            | 0.9.0         | Version to install                                               |
-| influxdb.web_admin          | True          | Enable web admin interface                                       |
-| influxdb.web_admin_port     | 8083          | Web admin interface port                                         |
-| influxdb.http_port          | 8086          | HTTP API endpoint port                                           |
-| influxdb.udp                | None           | List of UDP endpoints configurations (see influxdb.conf.j2 for more info)  |
-| influxdb.config_tpl         | 'influxdb.conf.j2' | A path to config template (to use custom template)               |
+| influxdb_version            | 0.11.1-1         | Version to install                                               |
+| influxdb_web_admin          | True          | Enable web admin interface                                       |
+| influxdb_web_admin_port     | 8083          | Web admin interface port                                         |
+| influxdb_http_port          | 8086          | HTTP API endpoint port                                           |
+| influxdb_udp                | None           | List of UDP endpoints configurations (see influxdb.conf.j2 for more info)  |
+| influxdb_config_tpl         | 'influxdb.conf.j2' | A path to config template (to use custom template)               |
 
 Example Playbook
 -------------------------

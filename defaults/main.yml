@@ -1,6 +1,5 @@
-influxdb:
-  version: 0.9.4
-  web_admin: True
-  web_admin_port: 8083
-  http_port: 8086
-  config_tpl: 'influxdb.conf.j2'
+influxdb_version: 0.11.1-1
+influxdb_web_admin: True
+influxdb_web_admin_port: 8083
+influxdb_http_api_port: 8086
+influxdb_config_tpl: 'influxdb.conf.j2'
